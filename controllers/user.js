@@ -38,43 +38,6 @@ exports.register = async (req, res) => {
     }
 };
 
-// exports.verify = async (req, res) => {
-
-//     try {
-//         const { userId, uniqueString } = req.params
-//         const isKey = await User.findOne({ id: userId });
-//         console.log("isKey", isKey.uniqueString);
-//         // console.log("======+++++", userId, "++++++", uniqueString);
-//         const isData = await bcrypt.compare(uniqueString, isKey.uniqueString);
-//         if (isData) {
-//             isKey.isActive = true
-//             await isKey.save();
-//             const token = jwt.sign({ userId: userId }, "saurabh", {
-//                 expiresIn: "10000h",
-//             });
-//             return res.status(201).json({
-//                 message: "verification  Successfully",
-//                 status: " verifed ",
-//                 token: token,
-//             });
-//         }
-//         else {
-//             return res.status(500).json({
-//                 message: "something went wrong",
-
-//             });
-//         }
-
-
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(500).json({
-//             status: 0,
-//             message: "something went wrong",
-//         });
-//     }
-// };
-
 exports.login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -91,6 +54,7 @@ exports.login = async (req, res) => {
             return res.status(200).json({
                 status: 1,
                 token: token,
+                userId: data.id
             });
         } else {
             res.send("user not found");
@@ -103,25 +67,17 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.Adminlogin = async (req, res) => {
-    const { email, password } = req.body;
-
-    const data = await User.findOne({
-        where: { email: email, isActive: true, role: "admin" },
-    });
-
+exports.userDetails = async (req, res) => {
     try {
-        const isData = await bcrypt.compare(password, data.password);
-        console.log(isData);
-        if (data && isData) {
-            const token = jwt.sign({ userId: data.id }, "saurabh");
-            return res.status(200).json({
-                status: 1,
-                token: token,
-            });
-        } else {
-            res.send("user not found");
-        }
+        const { id } = req.query;
+        console.log(req.query);
+        const data = await User.findOne({
+            where: { id: id }
+        });
+        return res.status(200).json({
+            status: 1,
+            data: data,
+        });
     } catch (err) {
         return res.status(500).json({
             status: 0,
@@ -129,3 +85,58 @@ exports.Adminlogin = async (req, res) => {
         });
     }
 };
+
+exports.userEdit = async (req, res) => {
+    try {
+        const { name, gender, password, phone, date } = req.body;
+        const { id } = req.query
+        const hashpassword = await bcrypt.hash(password, 10);
+        const updatedRows = await User.update(
+            {
+                name, gender, password: hashpassword, phone, date
+            },
+            {
+                where: {
+                    id: id
+                }
+            }
+        );
+        return res.status(200).json({
+            status: 1,
+            msg: "Update success",
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: 0,
+            message: "something went wrong",
+        });
+    }
+};
+
+
+exports.userDelete = async (req, res) => {
+    try {
+        const { id } = req.query;
+
+        const deletedRows = await User.destroy({
+            where: {
+                id: id
+            }
+        });
+
+        return res.status(200).json({
+            status: 1,
+            msg: "deleted success",
+        });
+    } catch (err) {
+        return res.status(500).json({
+            status: 0,
+            message: "something went wrong",
+        });
+    }
+};
+
+
+
+
+

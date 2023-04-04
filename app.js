@@ -20,13 +20,13 @@ const router = require('./routes/user')
 app.use('/user', router)
 
 // sequelize
-//   .sync({ alter: true })
-//   .then((result) => {
-//     console.log(result);
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
+//     .sync({ alter: true })
+//     .then((result) => {
+//         console.log(result);
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
 
 
 //server
